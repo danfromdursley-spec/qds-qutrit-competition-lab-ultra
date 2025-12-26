@@ -51,3 +51,10 @@ Just open the HTML file in a browser:
 python -m http.server 8011
 # then open:
 #   http://127.0.0.1:8011/qutrit_competition_lab_ultra.html
+
+---
+
+### LifeFirst
+
+This lab also follows **QDS_LifeFirst_EthicalDirective_v1.1**.  
+See **LIFEFIRST.md** for the full ethical core.
