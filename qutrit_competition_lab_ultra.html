@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Qutrit Competition Lab — Ultra</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg-1: #020510;
+      --bg-2: #041a1a;
+      --card: rgba(7, 16, 28, 0.92);
+      --card-soft: rgba(7, 16, 28, 0.85);
+      --border-soft: rgba(255, 255, 255, 0.06);
+      --text-main: #f9fafb;
+      --text-muted: #a3b3c2;
+      --accent-1: #ffb020; /* neon yellow/orange */
+      --accent-2: #ff4b6e; /* neon red/pink */
+      --accent-3: #2dfd7c; /* neon green */
+      --accent-4: #ffa93a; /* warm orange */
+      --chip-bg: rgba(255, 255, 255, 0.04);
+      --danger: #ff4b6e;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
+      --grid-gap: 0.9rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Roboto", sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 15% 0%, #201547 0, transparent 50%),
+        radial-gradient(circle at 85% 100%, #075b3a 0, transparent 55%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 0.75rem;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .lab-shell {
+      background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.05),
+          transparent 40%
+        ),
+        var(--card);
+      border-radius: 26px;
+      padding: 1rem 0.9rem 1.1rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px);
+    }
+
+    .lab-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0 0.1rem 0.4rem;
+    }
+
+    .lab-title-block h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .title-pill {
+      font-size: 0.78rem;
+      padding: 0.16rem 0.5rem;
+      border-radius: 999px;
+      background: radial-gradient(circle at 0 0, #ffdd7a, transparent 60%),
+        rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-transform: none;
+    }
+
+    .lab-sub {
+      margin-top: 0.2rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .pill {
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-3);
+      box-shadow: 0 0 8px var(--accent-3);
+    }
+
+    .layout-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 0.9rem;
+      margin-top: 0.4rem;
+    }
+
+    @media (max-width: 820px) {
+      .layout-main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: var(--card-soft);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      padding: 0.7rem 0.6rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .panel-subtext {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Canvas + controls */
+
+    .canvas-shell {
+      background: radial-gradient(circle at 0 0, rgba(255, 176, 32, 0.15), transparent 65%),
+        radial-gradient(circle at 100% 100%, rgba(45, 253, 124, 0.12), transparent 55%),
+        #050b12;
+      border-radius: var(--radius-md);
+      padding: 0.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.8);
+    }
+
+    canvas {
+      width: 100%;
+      max-height: 260px;
+      display: block;
+      border-radius: 12px;
+      background: radial-gradient(circle at 0 0, #02030a, #010205);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(7, 16, 28, 0.9);
+      color: var(--text-main);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.08s ease,
+        box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .btn span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-1);
+      box-shadow: 0 0 10px var(--accent-1);
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 0 0, #ffb020, #ff4b6e);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #05060a;
+      box-shadow: 0 0 16px rgba(255, 109, 37, 0.74);
+    }
+
+    .btn-quiet {
+      background: rgba(16, 27, 41, 0.92);
+    }
+
+    .btn-preset-1 {
+      border-color: rgba(255, 176, 32, 0.9);
+      color: #ffdd9a;
+    }
+
+    .btn-preset-2 {
+      border-color: rgba(255, 75, 110, 0.8);
+      color: #ffd0dd;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-style: dashed;
+      border-color: rgba(255, 255, 255, 0.25);
+      color: var(--text-muted);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    /* Metrics */
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--grid-gap);
+      margin-top: 0.2rem;
+    }
+
+    @media (max-width: 540px) {
+      .metrics-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric {
+      padding: 0.4rem 0.45rem 0.35rem;
+      border-radius: 14px;
+      background: linear-gradient(
+          135deg,
+          rgba(255, 176, 32, 0.05),
+          rgba(45, 253, 124, 0.05)
+        ),
+        rgba(4, 11, 19, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      font-size: 0.76rem;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.66rem;
+    }
+
+    .metric-value {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.9rem;
+    }
+
+    .metric-bar-shell {
+      position: relative;
+      margin-top: 0.2rem;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .metric-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 0%;
+      border-radius: inherit;
+      background-image: linear-gradient(90deg, #ff4b6e, #ffb020, #2dfd7c);
+      box-shadow: 0 0 8px rgba(255, 176, 32, 0.55);
+      transition: width 0.12s ease-out;
+    }
+
+    /* Sliders & controls */
+
+    .control-groups {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--grid-gap);
+      margin-top: 0.2rem;
+    }
+
+    @media (max-width: 540px) {
+      .control-groups {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .control-card {
+      background: rgba(2, 8, 16, 0.92);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.4rem 0.45rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+    }
+
+    .control-label-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      align-items: baseline;
+      font-size: 0.74rem;
+    }
+
+    .control-label {
+      color: var(--text-muted);
+    }
+
+    .control-value {
+      font-variant-numeric: tabular-nums;
+      color: var(--accent-4);
+      font-size: 0.72rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #ffb020);
+      box-shadow: 0 0 12px rgba(255, 176, 32, 0.9);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #ffb020);
+      box-shadow: 0 0 12px rgba(255, 176, 32, 0.9);
+      cursor: pointer;
+      border: none;
+    }
+
+    input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(3, 10, 18, 0.6);
+      vertical-align: middle;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .checkbox-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .hint {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.9;
+    }
+
+    /* Log */
+
+    .log-panel {
+      margin-top: 0.5rem;
+      border-radius: var(--radius-lg);
+      padding: 0.4rem 0.5rem 0.35rem;
+      background: radial-gradient(circle at 0 0, rgba(255, 176, 32, 0.12), transparent 60%),
+        rgba(2, 6, 14, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      gap: 0.4rem;
+    }
+
+    .log-body {
+      max-height: 120px;
+      overflow-y: auto;
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding-right: 0.25rem;
+      white-space: pre-wrap;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent-3);
+      box-shadow: 0 0 10px var(--accent-3);
+    }
+
+    .pill-warn {
+      border-color: var(--danger);
+      color: #ffc4d1;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="lab-shell">
+      <header class="lab-header">
+        <div class="lab-title-block">
+          <h1>
+            <span class="title-pill">QDS · Qutrit Arena</span>
+            <span>Qutrit Competition Lab</span>
+          </h1>
+          <div class="lab-sub">
+            <span class="pill">
+              <span class="pill-dot"></span>
+              Offline · Touch-first · No deps
+            </span>
+            <span class="pill">0 = Empty · 1 = P1 · 2 = P2</span>
+            <span class="pill pill-warn">Neon fairness sandbox · not advice</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="layout-main">
+        <!-- Left: canvas + primary controls -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Simulation Canvas</div>
+              <div class="panel-subtext">
+                Tap / drag to paint · two-finger = erase to 0 · long-press toggles brush (P1 ⇄ P2)
+              </div>
+            </div>
+          </div>
+
+          <div class="canvas-shell">
+            <canvas id="cv" width="120" height="72"></canvas>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-primary" id="btnRun">
+              <span class="dot"></span>
+              <span>Run</span>
+            </button>
+            <button class="btn btn-quiet" id="btnStep">Step</button>
+            <button class="btn btn-quiet" id="btnReset">Reset</button>
+            <button class="btn btn-quiet" id="btnRand">Randomize seed</button>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-preset-1" id="btnPresetFight">
+              Preset · Let them fight
+            </button>
+            <button class="btn btn-preset-2" id="btnPresetLock">
+              Preset · Lock-hungry
+            </button>
+            <button class="btn btn-ghost" id="btnExport">
+              Export settings JSON
+            </button>
+            <button class="btn btn-ghost" id="btnFair">
+              Quick fairness check (20 seeds)
+            </button>
+          </div>
+        </section>
+
+        <!-- Right: metrics + controls -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Controls & Metrics</div>
+              <div class="panel-subtext">
+                Same parameter stack · QDS-style fairness instrumentation.
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric">
+              <div class="metric-label">Time · steps/sec</div>
+              <div class="metric-value">
+                t = <span id="mT">0</span> ·
+                <span id="mSps">0</span>
+              </div>
+              <div class="hint">Target speed · capped internally for stability.</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Fractions (0 / P1 / P2)</div>
+              <div class="metric-value">
+                <span id="mFrac0">0.000</span> ·
+                <span id="mFrac1">0.000</span> ·
+                <span id="mFrac2">0.000</span>
+              </div>
+              <div class="metric-bar-shell">
+                <div id="barFrac1" class="metric-bar"></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Potential agreement</div>
+              <div class="metric-value" id="mPotAgree">0.000</div>
+              <div class="hint">Mean neighbour-agreement (0 = chaos, 1 = fully locked).</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Mean local cluster</div>
+              <div class="metric-value" id="mMeanCluster">0.00</div>
+              <div class="hint">Average size-proxy of like-state patches.</div>
+            </div>
+          </div>
+
+          <div class="control-groups">
+            <div class="control-card">
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Grid size</span>
+                  <span class="control-value">
+                    <span id="lblSize">60×36</span>
+                  </span>
+                </div>
+                <div class="hint">Width & height; toroidal wrapping for fair borders.</div>
+                <div class="control-row">
+                  <div class="control-label-line">
+                    <span class="control-label">Width</span>
+                    <span class="control-value" id="lblW">60</span>
+                  </div>
+                  <input id="W" type="range" min="20" max="120" step="2" value="60" />
+                </div>
+                <div class="control-row">
+                  <div class="control-label-line">
+                    <span class="control-label">Height</span>
+                    <span class="control-value" id="lblH">36</span>
+                  </div>
+                  <input id="H" type="range" min="12" max="72" step="2" value="36" />
+                </div>
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Speed</span>
+                  <span class="control-value">
+                    <span id="lblSpeed">30</span> steps/sec
+                  </span>
+                </div>
+                <input id="speed" type="range" min="1" max="50" step="1" value="30" />
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Seed</span>
+                  <span class="control-value" id="lblSeed">7</span>
+                </div>
+                <input id="seed" type="range" min="1" max="999" step="1" value="7" />
+              </div>
+
+              <div class="checkbox-row">
+                <label>
+                  <input id="wrap" type="checkbox" checked />
+                  <span>Wrap edges (toroidal)</span>
+                </label>
+                <label>
+                  <input id="unlock" type="checkbox" />
+                  <span>Allow rare unlock</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Init empty (0) fraction</span>
+                  <span class="control-value" id="lblOSeed">0.020</span>
+                </div>
+                <input id="oSeed" type="range" min="0" max="0.5" step="0.005" value="0.02" />
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Init P1 share (rest P2)</span>
+                  <span class="control-value" id="lblP1Frac">0.500</span>
+                </div>
+                <input id="p1Frac" type="range" min="0" max="1" step="0.01" value="0.5" />
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Competition temperature</span>
+                  <span class="control-value" id="lblTemp">1.200</span>
+                </div>
+                <input id="temp" type="range" min="0.3" max="3" step="0.05" value="1.2" />
+                <div class="hint">Higher = more randomness; lower = winner-takes-more.</div>
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Flip strength</span>
+                  <span class="control-value" id="lblFlipStr">1.150</span>
+                </div>
+                <input id="flipStr" type="range" min="0" max="2" step="0.05" value="1.15" />
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Flip noise (sym.)</span>
+                  <span class="control-value" id="lblFlipNoise">0.030</span>
+                </div>
+                <input id="flipNoise" type="range" min="0" max="0.1" step="0.002" value="0.03" />
+              </div>
+            </div>
+          </div>
+
+          <div class="control-groups">
+            <div class="control-card">
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Lock support</span>
+                  <span class="control-value" id="lblLockSup">4</span>
+                </div>
+                <input id="lockSup" type="range" min="1" max="8" step="1" value="4" />
+                <div class="hint">Minimum supporters in neighbourhood to consider locking.</div>
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Lock margin</span>
+                  <span class="control-value" id="lblLockMar">3</span>
+                </div>
+                <input id="lockMar" type="range" min="0" max="8" step="1" value="3" />
+              </div>
+            </div>
+
+            <div class="control-card">
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Lock base probability</span>
+                  <span class="control-value" id="lblLockBase">0.001</span>
+                </div>
+                <input id="lockBase" type="range" min="0" max="0.02" step="0.001" value="0.001" />
+              </div>
+
+              <div class="control-row">
+                <div class="control-label-line">
+                  <span class="control-label">Lock gain per margin</span>
+                  <span class="control-value" id="lblLockGain">0.040</span>
+                </div>
+                <input id="lockGain" type="range" min="0" max="0.1" step="0.005" value="0.04" />
+                <div class="hint">
+                  Higher = faster hardening of “won” patches.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <section class="log-panel">
+        <div class="log-header">
+          <div class="panel-title">Run log</div>
+          <div class="lab-sub">
+            <span class="pill">
+              <span class="status-dot"></span>
+              Local-only · No external calls
+            </span>
+          </div>
+        </div>
+        <div id="log" class="log-body"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+
+      const cv = $("cv");
+      const ctx = cv.getContext("2d", { alpha: false });
+
+      let W = 60;
+      let H = 36;
+      let wrap = true;
+      let unlock = false;
+      let speed = 30;
+      let seed = 7;
+      let oSeed = 0.02;
+      let p1Frac = 0.5;
+      let temp = 1.2;
+      let flipStr = 1.15;
+      let flipNoise = 0.03;
+      let lockSup = 4;
+      let lockMar = 3;
+      let lockBase = 0.001;
+      let lockGain = 0.04;
+
+      let grid = new Uint8Array(W * H);
+      let locked = new Uint8Array(W * H); // 0 = free, 1 = locked
+      let t = 0;
+      let running = false;
+      let stepAccumulator = 0;
+      let lastTick = performance.now();
+      let imgData = null;
+      let stepsPerSec = speed;
+
+      function idx(x, y) {
+        return y * W + x;
+      }
+
+      // --- RNG (seeded) ---
+      function mulberry32(a) {
+        return function () {
+          let t = (a += 0x6d2b79f5);
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      let rand = mulberry32(seed);
+
+      function reseed(newSeed) {
+        seed = newSeed;
+        rand = mulberry32(seed);
+      }
+
+      // --- Logging ---
+
+      function log(msg) {
+        const box = $("log");
+        const ts = new Date().toTimeString().slice(0, 8);
+        box.textContent = `[${ts}] ${msg}\n` + box.textContent;
+      }
+
+      // --- Randomize grid ---
+
+      function randomize() {
+        grid = new Uint8Array(W * H);
+        locked = new Uint8Array(W * H);
+
+        const total = W * H;
+        const n0 = Math.round(total * oSeed);
+
+        // empty first
+        for (let i = 0; i < n0; i++) {
+          grid[i] = 0;
+        }
+
+        // rest split between P1 / P2
+        const nRest = total - n0;
+        const n1 = Math.round(nRest * p1Frac);
+
+        for (let i = n0; i < n0 + n1; i++) grid[i] = 1;
+        for (let i = n0 + n1; i < total; i++) grid[i] = 2;
+
+        // shuffle
+        for (let i = total - 1; i > 0; i--) {
+          const j = (rand() * (i + 1)) | 0;
+          const tmp = grid[i];
+          grid[i] = grid[j];
+          grid[j] = tmp;
+        }
+
+        t = 0;
+        imgData = null;
+        updateMetrics();
+        render();
+      }
+
+      // --- Neighbour helpers ---
+
+      function neighbourCounts(x, y) {
+        let c0 = 0,
+          c1 = 0,
+          c2 = 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            let nx = x + dx;
+            let ny = y + dy;
+            if (wrap) {
+              if (nx < 0) nx += W;
+              if (nx >= W) nx -= W;
+              if (ny < 0) ny += H;
+              if (ny >= H) ny -= H;
+            } else {
+              if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+            }
+            const s = grid[idx(nx, ny)];
+            if (s === 0) c0++;
+            else if (s === 1) c1++;
+            else if (s === 2) c2++;
+          }
+        }
+        return [c0, c1, c2];
+      }
+
+      // --- One step of dynamics ---
+
+      function stepOnce() {
+        const next = new Uint8Array(W * H);
+        const nextLocked = new Uint8Array(W * H);
+
+        const unlockRate = unlock ? 0.0005 : 0;
+
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = idx(x, y);
+            let state = grid[i];
+            let lockedHere = locked[i];
+
+            if (lockedHere && rand() > unlockRate) {
+              next[i] = state;
+              nextLocked[i] = 1;
+              continue;
+            }
+
+            const [c0, c1, c2] = neighbourCounts(x, y);
+
+            // majority fight between P1 and P2
+            const diff = c1 - c2;
+            let candidate = state;
+
+            if (diff !== 0) {
+              const winner = diff > 0 ? 1 : 2;
+              const mag = Math.abs(diff);
+              const baseProb = 1 / (1 + Math.exp(-mag / Math.max(temp, 0.01)));
+              const pFlip = Math.min(1, baseProb * flipStr);
+              if (rand() < pFlip) candidate = winner;
+            }
+
+            // symmetric noise: random state flip to 1/2/0
+            if (rand() < flipNoise) {
+              const r = rand();
+              if (r < 0.1) candidate = 0;
+              else candidate = r < 0.55 ? 1 : 2;
+            }
+
+            state = candidate;
+
+            // lock-in if strong local support
+            const supporters = state === 1 ? c1 : state === 2 ? c2 : 0;
+            const opponent = state === 1 ? c2 : state === 2 ? c1 : 0;
+            const margin = supporters - opponent;
+
+            if (state !== 0 && supporters >= lockSup && margin >= lockMar) {
+              const pLock = lockBase + lockGain * margin;
+              if (rand() < pLock) {
+                lockedHere = 1;
+              }
+            }
+
+            next[i] = state;
+            nextLocked[i] = lockedHere;
+          }
+        }
+
+        grid = next;
+        locked = nextLocked;
+        t++;
+      }
+
+      // --- Metrics ---
+
+      function computeMetrics() {
+        const total = W * H;
+        let c0 = 0,
+          c1 = 0,
+          c2 = 0;
+
+        let agreeCount = 0;
+        let clusterProxySum = 0;
+
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = idx(x, y);
+            const s = grid[i];
+            if (s === 0) c0++;
+            else if (s === 1) c1++;
+            else if (s === 2) c2++;
+
+            // local agreement proxies
+            const [_, n1, n2] = neighbourCounts(x, y);
+            const neighSame = s === 1 ? n1 : s === 2 ? n2 : 0;
+            agreeCount += neighSame;
+            clusterProxySum += neighSame > 0 ? 1 + neighSame / 2 : 0.2;
+          }
+        }
+
+        const f0 = c0 / total;
+        const f1 = c1 / total;
+        const f2 = c2 / total;
+
+        const potAgree = agreeCount / (8 * total);
+        const meanCluster = clusterProxySum / total;
+
+        return { f0, f1, f2, potAgree, meanCluster };
+      }
+
+      function updateMetrics() {
+        const m = computeMetrics();
+
+        $("mT").textContent = t;
+        $("mSps").textContent = running ? `${Math.round(stepsPerSec)} (target)` : "0";
+
+        $("mFrac0").textContent = m.f0.toFixed(3);
+        $("mFrac1").textContent = m.f1.toFixed(3);
+        $("mFrac2").textContent = m.f2.toFixed(3);
+
+        $("mPotAgree").textContent = m.potAgree.toFixed(3);
+        $("mMeanCluster").textContent = m.meanCluster.toFixed(2);
+
+        $("barFrac1").style.width = Math.min(100, m.f1 * 100 + 0.1) + "%";
+      }
+
+      // --- Rendering ---
+
+      function render() {
+        if (!imgData || imgData.width !== W || imgData.height !== H) {
+          cv.width = W;
+          cv.height = H;
+          imgData = ctx.createImageData(W, H);
+        }
+
+        const data = imgData.data;
+        let p = 0;
+
+        for (let i = 0; i < grid.length; i++) {
+          const s = grid[i];
+          let r = 3,
+            g = 6,
+            b = 12;
+
+          if (s === 1) {
+            // neon cyan-green
+            r = 45;
+            g = 253;
+            b = 124;
+          } else if (s === 2) {
+            // neon orange / red
+            r = 255;
+            g = 130;
+            b = 40;
+          } else if (s === 0) {
+            r = 3;
+            g = 12;
+            b = 24;
+          }
+
+          data[p++] = r;
+          data[p++] = g;
+          data[p++] = b;
+          data[p++] = 255;
+        }
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.putImageData(imgData, 0, 0);
+        // scale handled by CSS
+      }
+
+      // --- Settings sync ---
+
+      function syncAllLabels() {
+        W = +$("W").value;
+        H = +$("H").value;
+        wrap = $("wrap").checked;
+        unlock = $("unlock").checked;
+        speed = +$("speed").value;
+        stepsPerSec = speed;
+        const newSeed = +$("seed").value;
+        oSeed = +$("oSeed").value;
+        p1Frac = +$("p1Frac").value;
+        temp = +$("temp").value;
+        flipStr = +$("flipStr").value;
+        flipNoise = +$("flipNoise").value;
+        lockSup = +$("lockSup").value;
+        lockMar = +$("lockMar").value;
+        lockBase = +$("lockBase").value;
+        lockGain = +$("lockGain").value;
+
+        $("lblW").textContent = W;
+        $("lblH").textContent = H;
+        $("lblSize").textContent = `${W}×${H}`;
+        $("lblSpeed").textContent = speed.toFixed(0);
+        $("lblSeed").textContent = newSeed.toFixed(0);
+        $("lblOSeed").textContent = oSeed.toFixed(3);
+        $("lblP1Frac").textContent = p1Frac.toFixed(3);
+        $("lblTemp").textContent = temp.toFixed(3);
+        $("lblFlipStr").textContent = flipStr.toFixed(3);
+        $("lblFlipNoise").textContent = flipNoise.toFixed(3);
+        $("lblLockSup").textContent = lockSup.toFixed(0);
+        $("lblLockMar").textContent = lockMar.toFixed(0);
+        $("lblLockBase").textContent = lockBase.toFixed(3);
+        $("lblLockGain").textContent = lockGain.toFixed(3);
+
+        reseed(newSeed);
+      }
+
+      function applySizeIfChanged() {
+        // simply reallocate buffers on any call
+        grid = new Uint8Array(W * H);
+        locked = new Uint8Array(W * H);
+        imgData = null;
+      }
+
+      // --- Export / restore config ---
+
+      function dumpConfig() {
+        return {
+          W,
+          H,
+          wrap,
+          unlock,
+          speed,
+          seed,
+          oSeed,
+          p1Frac,
+          temp,
+          flipStr,
+          flipNoise,
+          lockSup,
+          lockMar,
+          lockBase,
+          lockGain,
+        };
+      }
+
+      function restoreConfig(cfg) {
+        $("W").value = cfg.W;
+        $("H").value = cfg.H;
+        $("wrap").checked = cfg.wrap;
+        $("unlock").checked = cfg.unlock;
+        $("speed").value = cfg.speed;
+        $("seed").value = cfg.seed;
+        $("oSeed").value = cfg.oSeed;
+        $("p1Frac").value = cfg.p1Frac;
+        $("temp").value = cfg.temp;
+        $("flipStr").value = cfg.flipStr;
+        $("flipNoise").value = cfg.flipNoise;
+        $("lockSup").value = cfg.lockSup;
+        $("lockMar").value = cfg.lockMar;
+        $("lockBase").value = cfg.lockBase;
+        $("lockGain").value = cfg.lockGain;
+        syncAllLabels();
+        applySizeIfChanged();
+        randomize();
+      }
+
+      function exportSettings() {
+        const text = JSON.stringify(dumpConfig(), null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => log("Settings copied to clipboard (JSON)."))
+            .catch(() => {
+              log("Could not auto-copy; JSON printed below.");
+              log(text);
+            });
+        } else {
+          log("Clipboard API not available; JSON printed below.");
+          log(text);
+        }
+      }
+
+      function fairnessCheck() {
+        const saved = dumpConfig();
+        let totalDiff = 0;
+        let totalP1 = 0;
+        let totalP2 = 0;
+        const runs = 20;
+        const steps = 120;
+
+        running = false;
+        $("btnRun").textContent = "Run";
+
+        for (let s = 1; s <= runs; s++) {
+          $("seed").value = String(s * 7);
+          syncAllLabels();
+          applySizeIfChanged();
+          randomize();
+          for (let k = 0; k < steps; k++) stepOnce();
+          const m = computeMetrics();
+          totalDiff += Math.abs(m.f1 - m.f2);
+          totalP1 += m.f1;
+          totalP2 += m.f2;
+        }
+
+        restoreConfig(saved);
+        render();
+        updateMetrics();
+
+        log(
+          `Fairness check (${runs} seeds, ${steps} steps): mean |P1-P2| = ${(totalDiff / runs).toFixed(
+            4
+          )}; mean P1=${(totalP1 / runs).toFixed(4)} mean P2=${(totalP2 / runs).toFixed(4)}`
+        );
+      }
+
+      // --- Presets ---
+
+      function presetLetThemFight() {
+        const cfg = {
+          W: 60,
+          H: 36,
+          wrap: true,
+          unlock: false,
+          speed: 30,
+          seed: 7,
+          oSeed: 0.02,
+          p1Frac: 0.5,
+          temp: 1.2,
+          flipStr: 1.15,
+          flipNoise: 0.03,
+          lockSup: 4,
+          lockMar: 3,
+          lockBase: 0.001,
+          lockGain: 0.04,
+        };
+        restoreConfig(cfg);
+        log("Preset applied: Let them fight.");
+      }
+
+      function presetLockHungry() {
+        const cfg = {
+          W: 60,
+          H: 36,
+          wrap: true,
+          unlock: true,
+          speed: 24,
+          seed: 140,
+          oSeed: 0.02,
+          p1Frac: 0.5,
+          temp: 0.9,
+          flipStr: 1.4,
+          flipNoise: 0.02,
+          lockSup: 5,
+          lockMar: 3,
+          lockBase: 0.003,
+          lockGain: 0.06,
+        };
+        restoreConfig(cfg);
+        log("Preset applied: Lock-hungry.");
+      }
+
+      // --- Touch painting ---
+
+      let brush = 1; // 1 = P1, 2 = P2
+      let pointerDown = false;
+      let lastPaint = -1;
+      let longPressTimer = null;
+      let isTwoFinger = false;
+      const activePointers = new Set();
+
+      function clamp(v, lo, hi) {
+        return v < lo ? lo : v > hi ? hi : v;
+      }
+
+      function paintAt(clientX, clientY, state) {
+        const rect = cv.getBoundingClientRect();
+        const x = (clientX - rect.left) / rect.width;
+        const y = (clientY - rect.top) / rect.height;
+        const px = clamp((x * W) | 0, 0, W - 1);
+        const py = clamp((y * H) | 0, 0, H - 1);
+        const i = idx(px, py);
+        if (i === lastPaint) return;
+        lastPaint = i;
+        grid[i] = state;
+      }
+
+      function startLongPressToggle() {
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          brush = brush === 1 ? 2 : 1;
+          log(`Brush toggled: ${brush === 1 ? "P1" : "P2"}`);
+        }, 520);
+      }
+
+      cv.addEventListener("pointerdown", (e) => {
+        cv.setPointerCapture(e.pointerId);
+        activePointers.add(e.pointerId);
+        isTwoFinger = activePointers.size >= 2;
+        pointerDown = true;
+        lastPaint = -1;
+        startLongPressToggle();
+        const state = isTwoFinger ? 0 : brush;
+        paintAt(e.clientX, e.clientY, state);
+        render();
+        updateMetrics();
+      });
+
+      cv.addEventListener("pointermove", (e) => {
+        if (!pointerDown) return;
+        clearTimeout(longPressTimer);
+        const state = isTwoFinger ? 0 : brush;
+        paintAt(e.clientX, e.clientY, state);
+        render();
+        updateMetrics();
+      });
+
+      function endPointer(e) {
+        activePointers.delete(e.pointerId);
+        isTwoFinger = activePointers.size >= 2;
+        pointerDown = false;
+        clearTimeout(longPressTimer);
+      }
+
+      cv.addEventListener("pointerup", endPointer);
+      cv.addEventListener("pointercancel", endPointer);
+
+      // --- Tick loop ---
+
+      function tick(now) {
+        const dt = (now - lastTick) / 1000;
+        lastTick = now;
+
+        stepsPerSec = +$("speed").value;
+
+        if (running) {
+          stepAccumulator += dt * stepsPerSec;
+          const maxSteps = 240;
+          let did = 0;
+          while (stepAccumulator >= 1 && did < maxSteps) {
+            stepOnce();
+            stepAccumulator -= 1;
+            did++;
+          }
+          render();
+          if (t % 6 === 0) updateMetrics();
+        }
+
+        $("mSps").textContent = running ? `${Math.round(stepsPerSec)} (target)` : "0";
+        requestAnimationFrame(tick);
+      }
+
+      // --- Wire controls ---
+
+      $("btnRun").addEventListener("click", () => {
+        running = !running;
+        $("btnRun").textContent = running ? "Pause" : "Run";
+        log(running ? "Running." : "Paused.");
+      });
+
+      $("btnStep").addEventListener("click", () => {
+        running = false;
+        $("btnRun").textContent = "Run";
+        stepOnce();
+        render();
+        updateMetrics();
+      });
+
+      $("btnReset").addEventListener("click", () => {
+        running = false;
+        $("btnRun").textContent = "Run";
+        applySizeIfChanged();
+        randomize();
+      });
+
+      $("btnRand").addEventListener("click", () => {
+        running = false;
+        $("btnRun").textContent = "Run";
+        $("seed").value = String(((Math.random() * 999) | 0) + 1);
+        syncAllLabels();
+        applySizeIfChanged();
+        randomize();
+      });
+
+      $("btnPresetFight").addEventListener("click", presetLetThemFight);
+      $("btnPresetLock").addEventListener("click", presetLockHungry);
+      $("btnExport").addEventListener("click", exportSettings);
+      $("btnFair").addEventListener("click", fairnessCheck);
+
+      [
+        "W",
+        "H",
+        "oSeed",
+        "p1Frac",
+        "temp",
+        "flipStr",
+        "flipNoise",
+        "lockSup",
+        "lockMar",
+        "lockBase",
+        "lockGain",
+        "seed",
+        "speed",
+      ].forEach((id) => {
+        $(id).addEventListener("input", () => {
+          syncAllLabels();
+        });
+      });
+
+      $("wrap").addEventListener("change", syncAllLabels);
+      $("unlock").addEventListener("change", syncAllLabels);
+
+      window.addEventListener("resize", () => {
+        imgData = null;
+        render();
+      });
+
+      // --- Init ---
+
+      syncAllLabels();
+      applySizeIfChanged();
+      randomize();
+      requestAnimationFrame((n) => {
+        lastTick = n;
+        requestAnimationFrame(tick);
+      });
+      log("Qutrit Competition Lab — Ultra skin ready.");
+    })();
+  </script>
+</body>
+</html>
